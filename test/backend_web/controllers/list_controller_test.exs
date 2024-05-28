@@ -31,6 +31,19 @@ defmodule BackendWeb.ListControllerTest do
   end
 
   describe "create list" do
+    test "renders list without items", %{conn: conn} do
+      conn = post(conn, ~p"/api/lists", list: @create_attrs)
+      assert %{"id" => id} = json_response(conn, 201)["data"]
+
+      conn = get(conn, ~p"/api/lists/#{id}")
+
+      assert %{
+               "id" => ^id,
+               "name" => "Some list",
+               "items" => []
+             } = json_response(conn, 200)["data"]
+    end
+
     test "renders list when data is valid", %{conn: conn} do
       conn = post(conn, ~p"/api/lists", list: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]

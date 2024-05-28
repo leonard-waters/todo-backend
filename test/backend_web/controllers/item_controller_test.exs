@@ -44,7 +44,7 @@ defmodule BackendWeb.ItemControllerTest do
   describe "mark item as done" do
     setup [:create_item]
 
-    test "renders item when data is valid", %{conn: conn, item: %{id: id} = item} do
+    test "renders item after marking as done", %{conn: conn, item: %{id: id} = item} do
       conn = patch(conn, ~p"/api/lists/#{item.list_id}/items/#{id}/done")
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
@@ -57,6 +57,27 @@ defmodule BackendWeb.ItemControllerTest do
                  "done" => true
                }
              ] = json_response(conn, 200)["data"]["items"]
+    end
+
+    test "renders item when item is already done without an error", %{
+      conn: conn,
+      item: %{id: id} = item
+    } do
+      conn = patch(conn, ~p"/api/lists/#{item.list_id}/items/#{id}/done")
+      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+
+      conn = get(conn, ~p"/api/lists/#{item.list_id}")
+
+      assert [
+               %{
+                 "id" => ^id,
+                 "body" => "Some body",
+                 "done" => true
+               }
+             ] = json_response(conn, 200)["data"]["items"]
+
+      conn = patch(conn, ~p"/api/lists/#{item.list_id}/items/#{id}/done")
+      assert %{"id" => ^id} = json_response(conn, 200)["data"]
     end
   end
 
